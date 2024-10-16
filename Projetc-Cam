@@ -7,6 +7,7 @@ import easyocr
 import time
 import tkinter.font as tkfont
 
+
 # Variáveis globais
 cap = None
 reader = easyocr.Reader(['pt'])
@@ -15,7 +16,7 @@ limite_velocidade = 60.0
 camera_address = 0
 
 # Caminho do classificador Haar Cascade para carros
-car_cascade_path = "C:\\Users\\Revlo-Marketing\\Desktop\\Projeto_Ca\\cars.xml"
+car_cascade_path = "cars.xml"
 car_cascade = cv2.CascadeClassifier(car_cascade_path)
 
 if car_cascade.empty():
