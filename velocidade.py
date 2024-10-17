@@ -30,17 +30,21 @@ def calculate_speed_by_distance_time(start_time, end_time, distancia_real):
         return velocidade_mph
     return 0
 
+# Função para converter MPH para KM/H
+def convert_mph_to_kmh(speed_mph):
+    return speed_mph * 1.60934  # 1 MPH = 1.60934 KM/H
+
 # Função para registrar a velocidade em um arquivo de log
 def log_speed(speed):
     with open("speed_log.txt", "a") as log_file:
         log_file.write(f"{datetime.now()}: {speed:.2f} MPH\n")
 
-# Função para tirar foto do carro quando detectado
-def save_car_image(frame, objectID):
-    image_name = f"imagens_carros/car_{objectID}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
-    cv2.imwrite(image_name, frame)
-    print(f"[INFO] Foto salva: {image_name}")
-''
+# Função para tirar print da tela da câmera
+def save_car_screenshot(frame, objectID):
+    screenshot_name = f"imagens_carros/car_screenshot_{objectID}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
+    cv2.imwrite(screenshot_name, frame)
+    print(f"[INFO] Print da tela salvo: {screenshot_name}")
+
 # Função para inicializar a câmera
 def initialize_camera(video_source):
     vs = cv2.VideoCapture(video_source)
@@ -83,15 +87,16 @@ def process_frame(frame, trackableObjects, bg_subtractor, metroPorPixel):
             # Utilizando nova lógica de velocidade (tempo e distância)
             start_time = to.timestamp['A']
             end_time = to.timestamp['D']
-            speed = calculate_speed_by_distance_time(start_time, end_time, conf['distância'])
+            speed_mph = calculate_speed_by_distance_time(start_time, end_time, conf['distância'])
+            speed_kmh = convert_mph_to_kmh(speed_mph)  # Conversão para KM/H
             
-            to.speedMPH = speed
+            to.speedMPH = speed_mph
             log_speed(to.speedMPH)  # Logar a velocidade
             to.estimated = True
-            print(f"[INFO] Velocidade do veículo que acabou de passar é: {to.speedMPH:.2f} MPH")
+            print(f"[INFO] Velocidade do veículo: {to.speedMPH:.2f} MPH | {speed_kmh:.2f} KM/H")
             if to.speedMPH > conf["limite_de_velocidade"]:
                 print(f"[ALERT] Velocidade acima do limite: {to.speedMPH:.2f} MPH")
-                save_car_image(frame, to.objectID)  # Tirar foto do carro
+                save_car_screenshot(frame, to.objectID)  # Tirar print da tela do carro
                 car_count += 1  # Incrementar contagem de carros
 
         trackableObjects[objectID] = to
