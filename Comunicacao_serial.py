@@ -8,12 +8,17 @@ try:
 except serial.SerialException:
     print("nao conectado")
     pass
-comando = input("Digite o comando")
 
-if comando == "l":
-    conectado.write(b'1')
-else: 
-    conectado.write(b'0')
+while True:
+    comando = input("Digite o comando ")
+
+    if comando == "l":
+        conectado.write(b'1')
+    else: 
+        conectado.write(b'0')
+
+    if  input("Continue?").upper()=="N":
+        break
+
 conectado.close()
-
 print("Conecao fechada")
