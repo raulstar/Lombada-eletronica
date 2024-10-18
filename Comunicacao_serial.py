@@ -2,23 +2,26 @@ import  serial
 
 try:
 
-    conectado = serial.Serial("COM8", 1152200, timeout=0.5)
-    print(conectado)
-    print("cconectado na porta", conectado.portstr)
+    conexao = serial.Serial("COM8", 9600, timeout=0.5)
+    print(conexao)
+    print("Conecxao na porta", conexao.portstr)
 except serial.SerialException:
-    print("nao conectado")
+    print("nao conexao")
     pass
 
 while True:
-    comando = input("Digite o comando ")
+    serialstring = ""
+    serialstring = input("Digite o comando ")
+    conexao.write(serialstring.encode(encoding='ascii', errors='strict'))
+    
+    #conexao.write(b"teste")
+    # if comando == "l":
+    #     conexao.write(b'1')
+    # else: 
+    #     conexao.write(b'0')
 
-    if comando == "l":
-        conectado.write(b'1')
-    else: 
-        conectado.write(b'0')
+    # if  input("Continue?").upper()=="N":
+    #     break
 
-    if  input("Continue?").upper()=="N":
-        break
-
-conectado.close()
+conexao.close()
 print("Conecao fechada")
