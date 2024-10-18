@@ -16,7 +16,7 @@ conf = {
 }
 
 # Caminho fixo para salvar o log e imagens
-log_path = r"C:\Users\Revlo-Marketing\Desktop\Projeto_Ca\imagens_acima_limite"  # Coloque aqui o caminho da pasta que deseja salvar
+log_path = r"imagens_Carros"  # Coloque aqui o caminho da pasta que deseja salvar
 
 # Função para criar a pasta, se não existir
 def create_directory(path):
@@ -133,7 +133,7 @@ class TrackableObject:
 
 # Função principal
 def main():
-    video_path = r"C:\Users\Revlo-Marketing\Desktop\Projeto_Ca\WhatsApp Video 2024-10-17 at 08.57.49.mp4"  # Caminho do vídeo de teste
+    video_path = r"C:\Users\Raulstar\Downloads\Video veiculo.mp4"  # Caminho do vídeo de teste
     mode = input("Digite 'c' para usar a câmera ou 'v' para usar um vídeo: ")
 
     try:
