@@ -1,5 +1,7 @@
 import  serial
 
+velocidade = "00 km"
+
 try:
 
     conexao = serial.Serial("COM8", 9600, timeout=0.5)
@@ -11,8 +13,9 @@ except serial.SerialException:
 
 while True:
     serialstring = ""
-    serialstring = input("Digite o comando ")
-    conexao.write(serialstring.encode(encoding='ascii', errors='strict'))
+    #velocidade = input("Digite o comando ")
+
+    conexao.write(velocidade.encode(encoding='ascii', errors='strict'))
     
     #conexao.write(b"teste")
     # if comando == "l":
@@ -20,8 +23,8 @@ while True:
     # else: 
     #     conexao.write(b'0')
 
-    # if  input("Continue?").upper()=="N":
-    #     break
+    if  input("Continue?").upper()=="N":
+         break
 
 conexao.close()
 print("Conecao fechada")
