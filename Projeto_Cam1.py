@@ -12,7 +12,7 @@ cap = None
 reader = easyocr.Reader(['pt'])  # Inicializa o leitor de OCR
 placas_registradas = []  # Lista para armazenar as placas detectadas
 limite_velocidade = 60.0  # Limite de velocidade padrão em km/h
-camera_address = 1  # Endereço da câmera (0 para webcam, ou USB no Linux)
+camera_address = 2  # Endereço da câmera (0 para webcam, ou USB no Linux)
 
 # Caminho do classificador Haar Cascade para carros
 car_cascade_path = "cars.xml"  # Altere para o caminho correto
@@ -128,6 +128,7 @@ def carregar_camera():
 
 def parar_sistema():
     global cap
+    root.destroy()##
     if cap:
         cap.release()
         cap = None
