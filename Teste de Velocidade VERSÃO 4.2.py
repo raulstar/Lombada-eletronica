@@ -128,7 +128,7 @@ class TrackableObject:
 
 # Função principal
 def main():
-    video_path = r"C:\Users\Revlo-Marketing\Desktop\Projeto_Ca\WhatsApp Video 2024-10-17 at 08.57.49.mp4"
+    video_path = r"Lombada-eletronica\imagens_Carros\Video veiculo.mp4"
     mode = input("Digite 'c' para usar a câmera ou 'v' para usar um vídeo: ")
 
     try:
