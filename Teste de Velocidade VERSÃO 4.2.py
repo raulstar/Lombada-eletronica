@@ -4,13 +4,13 @@ import os
 from datetime import datetime
 
 # Carrega o classificador
-classifier_path = r"C:\Users\Revlo-Marketing\Desktop\Projeto_Ca\haarcascade_car.xml"
+classifier_path = r"cars.xml"
 classifier = cv2.CascadeClassifier(classifier_path)
 
 # Distância em metros entre dois pontos de referência
 distancia = 2  # Ajuste conforme necessário
 velocidade_limite = 60  # Limite de velocidade em KM/H
-log_path = r"C:\\Users\\Revlo-Marketing\\Desktop\\Projeto_Ca\\imagens_acima_limite"
+log_path = r"imagens_Carros"
 
 # Função para criar pasta se não existir
 def create_directory(path):

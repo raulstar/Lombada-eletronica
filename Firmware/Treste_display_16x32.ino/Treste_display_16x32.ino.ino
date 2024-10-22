@@ -11,7 +11,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Bibliotecas
-#include <LiquidCrystal.h>  // Inclui biblioteca "LiquidCristal.h"
 #include <SPI.h>
 #include <DMD.h>
 #include <TimerOne.h>
@@ -23,7 +22,6 @@
 // Definições
 #define DISPLAYS_ACROSS 1
 #define DISPLAYS_DOWN 1
-LiquidCrystal lcd(8, 9, 4, 5, 6, 7);  // Define Pinos do Display
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // variáveis
@@ -43,14 +41,13 @@ void teste();
 // Confiruração
 void setup() {
 
-  lcd.begin(16, 2);  // Estabelece caracteres do display
   Serial.begin(9600);
   pinMode(LED_BUILTIN, OUTPUT);
   Timer1.initialize(5000);
   Timer1.attachInterrupt(ScanDMD);
   dmd.clearScreen(true);
-  lcd.print("Teste comunicacao");
-  void teste();
+  Serial.print("Teste comunicacao");
+  teste();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -60,12 +57,11 @@ void loop() {
   /*---------------------------------------  serial  -------------------------------------*/
   while (Serial.available()) {
     Serial.println(RX);
-
     RX = Serial.readString();  // read the incoming data as string
     display();
   }
 }
-void display(){
+void display() {
   int slen = 0;
   dmd.clearScreen(true);
   /*---------------------------------------  Display using SystemFont  -------------------------------------*/
@@ -78,34 +74,34 @@ void display(){
   slen = str.length() + 1;
   str.toCharArray(b, slen);
   dmd.drawString(1, 8, b, slen, GRAPHICS_NORMAL);
-  delay(2000);
+  delay(1000);
   dmd.clearScreen(true);
-  delay(100);
+  //delay(100);
 
-   /*----------------------------------  Display using  Arial14  -------------------------------------------- */
+  /*----------------------------------  Display using  Arial14  -------------------------------------------- */
   dmd.selectFont(Arial_Black_16);
   str = RX;
   slen = str.length() + 1;
   str.toCharArray(b, slen);
   dmd.drawString(6, 1, b, slen, GRAPHICS_NORMAL);
-  //delay(4000);
-  //dmd.clearScreen(true);
-  //delay(500);
-
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void teste(){
-  int slen = 0;
+void teste() {
+ int slen = 0;
   dmd.clearScreen(true);
+  /*---------------------------------------  Display using SystemFont  -------------------------------------*/
   dmd.selectFont(SystemFont5x7);
-  str = "Teste";
+  str = "Em";
   slen = str.length() + 1;
   str.toCharArray(b, slen);
   dmd.drawString(1, 0, b, slen, GRAPHICS_NORMAL);
-  str = "Comun..";
+  str = "Teste";
   slen = str.length() + 1;
   str.toCharArray(b, slen);
   dmd.drawString(1, 8, b, slen, GRAPHICS_NORMAL);
+  //delay(1000);
+  //dmd.clearScreen(true);
+  //delay(1000);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
