@@ -5,7 +5,7 @@ import numpy as np
 import os
 
 # Configurações de limite de velocidade
-limit = 10  # km/h
+limit = 30  # km/h
 traffic_record_folder_name = "TrafficRecord"
 distance_between_points = 5.0  # Distância entre os pontos em metros
 
@@ -107,7 +107,7 @@ class EuclideanDistTracker:
 tracker = EuclideanDistTracker()
 
 # Captura de vídeo
-cap = cv2.VideoCapture(r"C:\Users\Revlo-Marketing\Desktop\Projeto_Ca\WhatsApp Video 2024-10-22 at 14.23.09.mp4")
+cap = cv2.VideoCapture(r"Lombada-eletronica\imagens_Carros\Video varios veiculo 2.mp4")
 f = 25
 w = int(1000 / (f - 1))
 
