@@ -114,7 +114,7 @@ def main():
             video = cv2.VideoCapture(0)  # Webcam padrão
             print("[INFO] Inicializando webcam...")
         elif mode.lower() == 'v':
-            video_path = r"Lombada-eletronica\imagens_Carros\Video veiculo.mp4"
+            video_path = r"Lombada-eletronica\imagens_Carros\Video varios veiculo.mp4"
             video = cv2.VideoCapture(video_path)
             print("[INFO] Inicializando vídeo de teste...")
         else:
