@@ -1,19 +1,19 @@
 import serial
 
-velocidade = "00 km"
+velocidade = "36 km"
 
 try:
 
-    conexao = serial.Serial("COM8", 9600, timeout=0.5)
+    conexao = serial.Serial("COM3", 9600, timeout=0.5)
     print(conexao)
     print("Conecxao na porta", conexao.portstr)
 except serial.SerialException:
-    print("nao conexao")
+    print("nao conectado")
     pass
 
 while True:
     serialstring = ""
-    #velocidade = input("Digite o comando ")
+    ##velocidade = input("Digite o comando ")
 
     conexao.write(velocidade.encode(encoding='ascii', errors='strict'))
     
