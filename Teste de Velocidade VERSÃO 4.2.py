@@ -14,10 +14,10 @@ conf = {
 }
 
 # Caminho fixo para salvar o log e imagens
-log_path_base = r"C:\Users\Revlo-Marketing\Desktop\Projeto_Ca\imagens_acima_limite"
+log_path_base = r"Lombada-eletronica\imagens_acima_limite"
 
 # Carregar o modelo Haar Cascade
-car_cascade = cv2.CascadeClassifier(r"C:\Users\Revlo-Marketing\Desktop\Projeto_Ca\haarcascade_car.xml")
+car_cascade = cv2.CascadeClassifier(r"Lombada-eletronica/cars.xml")
 
 # Função para criar subpastas diárias
 def create_directory(path):
