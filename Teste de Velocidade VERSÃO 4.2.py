@@ -1,111 +1,168 @@
 import cv2
-import time
+import numpy as np
 import os
 from datetime import datetime
 
-# Carrega o classificador
-classifier_path = r"cars.xml"
-classifier = cv2.CascadeClassifier(classifier_path)
+# Configurações iniciais
+conf = {
+    "distância_real": 14,  # distância real em metros entre os pontos
+    "limite_de_velocidade": 10,  # em MPH
+    "ponto_A": 120,  # Ponto inicial para cálculo de velocidade (coordenada Y)
+    "ponto_B": 160,  # Ponto final para cálculo de velocidade (coordenada Y)
+}
 
-# Distância em metros entre dois pontos de referência
-distancia = 2  # Ajuste conforme necessário
-velocidade_limite = 60  # Limite de velocidade em KM/H
-log_path = r"imagens_Carros"
+# Caminho fixo para salvar o log e imagens
+log_path_base = r"C:\Users\Revlo-Marketing\Desktop\Projeto_Ca\imagens_acima_limite"
 
-# Função para criar pasta se não existir
+# Carregar o modelo Haar Cascade
+car_cascade = cv2.CascadeClassifier(r"C:\Users\Revlo-Marketing\Desktop\Projeto_Ca\haarcascade_car.xml")
+
+# Função para criar subpastas diárias
 def create_directory(path):
     os.makedirs(path, exist_ok=True)
 
-def detecta_carros(frame):
-    """Detecta carros em um frame e retorna suas posições."""
-    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # Converte o frame para escala de cinza
-    carros = classifier.detectMultiScale(gray_frame, scaleFactor=1.3, minNeighbors=4, minSize=(60, 60))
-    return carros
+def get_log_path():
+    date_str = datetime.now().strftime('%Y%m%d')
+    log_path = os.path.join(log_path_base, date_str)
+    create_directory(log_path)
+    return log_path
 
-def calcular_velocidade(tempo):
-    """Calcula a velocidade em MPH dado o tempo em segundos."""
-    if tempo > 0:
-        velocidade_mph = (distancia / tempo) * 2.23694  # Converte metros por segundo para milhas por hora
+# Função para calcular a velocidade com base na distância e tempo
+def calculate_speed_by_distance_time(start_time, end_time, distancia_real):
+    time_elapsed = (end_time - start_time).total_seconds()
+    if time_elapsed > 0:
+        velocidade_mps = distancia_real / time_elapsed
+        velocidade_mph = velocidade_mps * 2.23694  # Conversão para MPH
         return velocidade_mph
     return 0
 
-def converter_mph_para_kmh(velocidade_mph):
-    """Converte a velocidade de MPH para KM/H."""
-    return velocidade_mph * 1.60934
+# Função para registrar a velocidade em um arquivo de log na pasta especificada
+def log_speed(speed):
+    log_path = get_log_path()
+    log_file_path = os.path.join(log_path, f"speed_log_{datetime.now().strftime('%Y%m%d')}.txt")
+    velocidade_kmh = speed * 1.60934  # Conversão de MPH para KM/H
+    with open(log_file_path, "a") as log_file:
+        log_file.write(f"{datetime.now()}: {speed:.2f} MPH ({velocidade_kmh:.2f} KM/H)\n")
 
+# Função para tirar print e salvar a imagem quando o carro ultrapassar a velocidade limite
 def save_snapshot(frame, objectID, speed):
-    """Salva uma imagem quando o carro ultrapassa o limite de velocidade."""
-    snapshot_filename = f"carro_{objectID}_speed_{speed:.2f}KMH_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
+    log_path = get_log_path()
+    snapshot_filename = f"carro_{objectID}_speed_{speed:.2f}_MPH_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
     snapshot_path = os.path.join(log_path, snapshot_filename)
     cv2.imwrite(snapshot_path, frame)
     print(f"[INFO] Imagem salva: {snapshot_path}")
 
-def simulator(video):
-    """Executa a simulação da detecção de carros em um vídeo."""
-    if not video.isOpened():
-        print("Erro ao abrir o vídeo.")
-        return
+# Função para inicializar a câmera
+def initialize_camera():
+    vs = cv2.VideoCapture(0)
+    if not vs.isOpened():
+        raise ValueError("Não foi possível abrir a câmera. Verifique se está conectada corretamente.")
+    return vs
 
-    create_directory(log_path)
+# Função para inicializar o vídeo de teste
+def initialize_video(video_path):
+    vs = cv2.VideoCapture(video_path)
+    if not vs.isOpened():
+        raise ValueError("Não foi possível abrir o vídeo. Verifique se o caminho está correto.")
+    return vs
 
-    objectID = 0  # Identificador único para o carro
+# Função para processar o quadro com Haar Cascade
+def process_frame_with_cascade(frame, trackableObjects, bg_subtractor):
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    cars = car_cascade.detectMultiScale(gray, 1.1, 1)
 
-    while True:
-        ret, frame = video.read()
-        if not ret:
-            print("Fim do vídeo ou erro ao ler o frame.")
-            break
+    objects = {}
+    frame_height, frame_width = frame.shape[:2]
+    min_area = (frame_height * frame_width) * 0.01
 
-        carros = detecta_carros(frame)
-        for (x, y, w, h) in carros:
-            objectID += 1  # Incrementa o ID do carro detectado
-            # Desenha o retângulo ao redor do carro
-            cv2.rectangle(frame, (x, y), (x + w, y + h), color=(0, 255, 0), thickness=2)
+    for (x, y, w, h) in cars:
+        if w * h < min_area:
+            continue
 
-            # Inicia o cálculo de tempo para a velocidade
-            tempo_inicial = time.time()
-            
-            # Simulação de tempo até o carro sair da tela
-            time.sleep(0.5)  # Simula o tempo em segundos que o carro leva para sair da tela
+        centroid = (int(x + w // 2), int(y + h // 2))
+        objectID = len(objects) + 1
+        objects[objectID] = centroid
 
-            tempo_final = time.time()
-            tempo_passado = tempo_final - tempo_inicial
-            velocidade_mph = calcular_velocidade(tempo_passado)
-            velocidade_kmh = converter_mph_para_kmh(velocidade_mph)
-            print(f"Velocidade: {velocidade_mph:.2f} MPH / {velocidade_kmh:.2f} KM/H")
+        to = trackableObjects.get(objectID, None)
+        if to is None:
+            to = TrackableObject(objectID, centroid)
+            to.timestamp['A'] = datetime.now()
 
-            # Verifica se a velocidade ultrapassa o limite
-            if velocidade_kmh > velocidade_limite:
-                save_snapshot(frame, objectID, velocidade_kmh)
+        to.centroids.append(centroid)
 
-        # Mostra o frame com as detecções
-        cv2.imshow('Detecção de Carros', frame)
+        # Se o objeto se moveu de um ponto "A" até um ponto "B"
+        if len(to.centroids) >= 2 and to.crossed_A_B(conf["ponto_A"], conf["ponto_B"]):
+            start_time = to.timestamp['A']
+            end_time = datetime.now()
+            speed_mph = calculate_speed_by_distance_time(start_time, end_time, conf["distância_real"])
 
-        if cv2.waitKey(1) == ord('q'):  # Pressione 'q' para sair
-            break
+            to.speedMPH = speed_mph
+            log_speed(to.speedMPH)
+            print(f"[INFO] Velocidade do veículo: {to.speedMPH:.2f} MPH")
+            if to.speedMPH > conf["limite_de_velocidade"]:
+                print(f"[ALERT] Velocidade acima do limite: {to.speedMPH:.2f} MPH")
+                save_snapshot(frame, to.objectID, to.speedMPH)
 
-    video.release()
-    cv2.destroyAllWindows()
+        trackableObjects[objectID] = to
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        text = f"ID {objectID} | Speed: {to.speedMPH:.2f} MPH"
+        cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-# Inicia a captura de vídeo
+    return frame
+
+# Classe TrackableObject
+class TrackableObject:
+    def __init__(self, objectID, centroid):
+        self.objectID = objectID
+        self.centroids = [centroid]
+        self.timestamp = {"A": datetime.now(), "B": datetime.now()}
+        self.speedMPH = 0.0
+
+    def crossed_A_B(self, ponto_A, ponto_B):
+        if ponto_A < self.centroids[-1][1] < ponto_B:
+            self.timestamp['B'] = datetime.now()
+            return True
+        return False
+
+# Função principal
 def main():
+    video_path = r"C:\Users\Revlo-Marketing\Desktop\Projeto_Ca\WhatsApp Video 2024-10-17 at 08.57.49.mp4"
     mode = input("Digite 'c' para usar a câmera ou 'v' para usar um vídeo: ")
-    
+
     try:
+        create_directory(log_path_base)
+        conf["limite_de_velocidade"] = float(input("Digite o limite de velocidade em MPH: "))
+        
         if mode.lower() == 'c':
-            video = cv2.VideoCapture(0)  # Webcam padrão
             print("[INFO] Inicializando webcam...")
+            vs = initialize_camera()
         elif mode.lower() == 'v':
-            video_path = r"C:\Users\Revlo-Marketing\Pictures\Camera Roll\WIN_20241010_11_28_19_Pro.mp4"
-            video = cv2.VideoCapture(video_path)
             print("[INFO] Inicializando vídeo de teste...")
+            vs = initialize_video(video_path)
         else:
             raise ValueError("Modo inválido. Digite 'c' para câmera ou 'v' para vídeo.")
-
-        simulator(video)
-
+        
+        trackableObjects = {}
+        bg_subtractor = cv2.createBackgroundSubtractorMOG2()
     except Exception as e:
         print(f"[ERROR] {e}")
+        return
+
+    while True:
+        ret, frame = vs.read()
+        if not ret:
+            print("[WARNING] O vídeo terminou ou não pode ser lido.")
+            break
+
+        frame = cv2.resize(frame, (640, 480))  # Reduzir resolução para melhorar performance
+        frame = process_frame_with_cascade(frame, trackableObjects, bg_subtractor)
+        cv2.imshow("Detecção de Velocidade", frame)
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord("q"):
+            break
+
+    vs.release()
+    cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     main()
