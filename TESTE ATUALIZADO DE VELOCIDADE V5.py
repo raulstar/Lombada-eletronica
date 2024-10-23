@@ -107,7 +107,7 @@ class EuclideanDistTracker:
 tracker = EuclideanDistTracker()
 
 # Captura de vídeo
-cap = cv2.VideoCapture(r"Lombada-eletronica\imagens_Carros\Video varios veiculo 2.mp4")
+cap = cv2.VideoCapture(r"Lombada-eletronica\20241023_091252_1.mp4")
 f = 25
 w = int(1000 / (f - 1))
 
